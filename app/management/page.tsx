@@ -4,7 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 
 export default function MultiManagement() {
     const [entities, setEntities] = useState<any[]>([]);
-    const [name, setName] = useState('');
+    const [newEntity, setNewEntity] = useState({ name: '', logo: '' });
+    const [newSite, setNewSite] = useState({ entityId: '', name: '', lat: '', lng: '' });
+    
     const supabase = createClient('https://uysfhchahbayozbisppy.supabase.co', 'sb_publishable_T03nYMwpGp1uXXTPLqx_1Q_JnzMuqML');
 
     useEffect(() => { fetchEntities(); }, []);
@@ -15,30 +17,64 @@ export default function MultiManagement() {
     };
 
     const addEntity = async () => {
-        if (!name) return;
-        await supabase.from('entities').insert([{ name }]);
-        setName('');
+        if (!newEntity.name) return;
+        await supabase.from('entities').insert([{ name: newEntity.name, logo_url: newEntity.logo }]);
+        setNewEntity({ name: '', logo: '' });
+        fetchEntities();
+    };
+
+    const addSite = async (eId: string) => {
+        if (!newSite.name) return;
+        await supabase.from('sites').insert([{ 
+            entity_id: eId, site_name: newSite.name, 
+            latitude: parseFloat(newSite.lat), longitude: parseFloat(newSite.lng) 
+        }]);
+        setNewSite({ entityId: '', name: '', lat: '', lng: '' });
         fetchEntities();
     };
 
     return (
         <div style={{ padding: '20px', direction: 'rtl' }}>
-            <h2 style={{ color: '#d32f2f' }}>إدارة الجهات والمواقع</h2>
+            <h2 style={{ color: '#d32f2f', textAlign: 'center' }}>إدارة العملاء والمواقع الجغرافية</h2>
             
-            <div style={{ background: '#fff', padding: '15px', borderRadius: '10px', marginBottom: '20px' }}>
-                <h4>➕ إضافة جهة جديدة (شركة/جهة)</h4>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <input style={{ flex: 1, padding: '10px' }} placeholder="اسم الشركة" value={name} onChange={e=>setName(e.target.value)} />
-                    <button onClick={addEntity} style={{ padding: '10px 20px', background: '#333', color: 'white', border: 'none', borderRadius: '5px' }}>حفظ</button>
-                </div>
+            {/* إضافة جهة/عميل جديد */}
+            <div style={{ background: '#fff', padding: '20px', borderRadius: '12px', marginBottom: '25px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                <h4 style={{ marginTop: 0 }}>🏢 إضافة عميل جديد</h4>
+                <input style={{ width: '100%', padding: '12px', marginBottom: '10px' }} placeholder="اسم العميل (مثلاً: شركة أرامكو)" value={newEntity.name} onChange={e=>setNewEntity({...newEntity, name: e.target.value})} />
+                <input style={{ width: '100%', padding: '12px', marginBottom: '15px' }} placeholder="رابط شعار العميل (URL)" value={newEntity.logo} onChange={e=>setNewEntity({...newEntity, logo: e.target.value})} />
+                <button onClick={addEntity} style={{ width: '100%', padding: '12px', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold' }}>حفظ العميل</button>
             </div>
 
-            <div style={{ display: 'grid', gap: '15px' }}>
+            {/* عرض الجهات والمواقع */}
+            <div style={{ display: 'grid', gap: '20px' }}>
                 {entities.map((ent, i) => (
-                    <div key={i} style={{ background: '#fff', padding: '15px', borderRadius: '10px', borderRight: '5px solid #d32f2f' }}>
-                        <div style={{ fontWeight: 'bold', fontSize: '18px' }}>{ent.name}</div>
-                        <div style={{ fontSize: '14px', color: '#666' }}>عدد المواقع المسجلة: {ent.sites?.length || 0}</div>
-                        <button style={{ marginTop: '10px', background: 'none', border: '1px solid #d32f2f', color: '#d32f2f', padding: '5px 10px', borderRadius: '5px' }}>+ إضافة موقع لهذه الجهة</button>
+                    <div key={i} style={{ background: '#fff', padding: '20px', borderRadius: '12px', borderRight: '8px solid #d32f2f', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+                            {ent.logo_url && <img src={ent.logo_url} style={{ height: '50px', width: '50px', objectFit: 'contain', border: '1px solid #eee', padding: '2px' }} />}
+                            <h3 style={{ margin: 0 }}>{ent.name}</h3>
+                        </div>
+
+                        <div style={{ background: '#f9f9f9', padding: '15px', borderRadius: '8px' }}>
+                            <h5 style={{ margin: '0 0 10px 0' }}>📍 المواقع التابعة لها:</h5>
+                            {ent.sites?.map((s: any, idx: number) => (
+                                <div key={idx} style={{ padding: '8px', borderBottom: '1px solid #eee', fontSize: '14px', display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>{s.site_name}</span>
+                                    {s.latitude && (
+                                        <a href={`https://www.google.com/maps?q=${s.latitude},${s.longitude}`} target="_blank" style={{ color: '#d32f2f', textDecoration: 'none', fontWeight: 'bold' }}>📍 فتح الخريطة</a>
+                                    )}
+                                </div>
+                            ))}
+                            
+                            {/* إضافة موقع للموقع الحالي */}
+                            <div style={{ marginTop: '15px', borderTop: '1px dashed #ccc', paddingTop: '10px' }}>
+                                <input placeholder="اسم الموقع الجديد" style={{ width: '100%', padding: '8px', marginBottom: '5px' }} onBlur={e => setNewSite({...newSite, name: e.target.value})} />
+                                <div style={{ display: 'flex', gap: '5px' }}>
+                                    <input placeholder="خط العرض (Lat)" style={{ flex: 1, padding: '8px' }} onBlur={e => setNewSite({...newSite, lat: e.target.value})} />
+                                    <input placeholder="خط الطول (Lng)" style={{ flex: 1, padding: '8px' }} onBlur={e => setNewSite({...newSite, lng: e.target.value})} />
+                                </div>
+                                <button onClick={() => addSite(ent.id)} style={{ width: '100%', marginTop: '5px', padding: '10px', background: '#333', color: 'white', border: 'none', borderRadius: '5px' }}>إضافة الموقع</button>
+                            </div>
+                        </div>
                     </div>
                 ))}
             </div>
