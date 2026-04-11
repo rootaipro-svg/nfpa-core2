@@ -1,40 +1,66 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import Link from 'next/link';
 
-export default function Dashboard() {
+export default function ProfessionalDashboard() {
     const [inspections, setInspections] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
     const supabase = createClient('https://uysfhchahbayozbisppy.supabase.co', 'sb_publishable_T03nYMwpGp1uXXTPLqx_1Q_JnzMuqML');
 
-    useEffect(() => { fetchInspections(); }, []);
-    const fetchInspections = async () => {
-        const { data } = await supabase.from('valve_inspections').select('*, fire_valves(valve_number)').order('inspection_date', { ascending: false });
-        if (data) setInspections(data);
-        setLoading(false);
-    };
+    useEffect(() => {
+        const fetchReports = async () => {
+            // جلب البيانات مع ربط المنظومة والمبنى
+            const { data } = await supabase
+                .from('valve_inspections')
+                .select('*, fire_valves(*, fire_systems(*))')
+                .order('inspection_date', { ascending: false });
+            if (data) setInspections(data);
+            setLoading(false);
+        };
+        fetchReports();
+    }, []);
 
     return (
-        <div style={{ padding: '15px', direction: 'rtl' }}>
-            <h2 style={{ color: '#d32f2f', textAlign: 'center' }}>تقارير الفحص الميداني</h2>
-            {loading ? <p style={{ textAlign: 'center' }}>جاري التحميل...</p> : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    {inspections.map((insp, i) => (
-                        <div key={i} style={{ background: '#fff', padding: '15px', borderRadius: '12px', border: '1px solid #eee', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px', marginBottom: '10px' }}>
-                                <strong>{insp.fire_valves?.valve_number || 'صمام غير معروف'}</strong>
-                                <span style={{ fontSize: '12px', color: '#666' }}>{new Date(insp.inspection_date).toLocaleDateString('ar-SA')}</span>
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '14px' }}>
-                                <div>مفتوح: {insp.is_fully_open ? '✅' : '❌'}</div>
-                                <div>تسريب: {insp.has_leaks ? '⚠️' : '✅'}</div>
-                                <div style={{ gridColumn: 'span 2' }}>المفتش: <strong>{insp.inspector_name}</strong></div>
-                            </div>
-                            {insp.notes && <div style={{ marginTop: '10px', padding: '10px', background: '#f9f9f9', borderRadius: '5px', fontSize: '13px' }}>{insp.notes}</div>}
-                        </div>
-                    ))}
-                </div>
-            )}
+        <div style={{ padding: '20px', direction: 'rtl', fontFamily: 'Arial' }}>
+            <h2 style={{ borderBottom: '3px solid #d32f2f', paddingBottom: '10px' }}>سجل الامتثال السنوي (ITM Compliance Log)</h2>
+            
+            <div style={{ overflowX: 'auto', marginTop: '20px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff' }}>
+                    <thead>
+                        <tr style={{ background: '#333', color: '#fff' }}>
+                            <th style={{ padding: '12px', border: '1px solid #ddd' }}>التاريخ</th>
+                            <th style={{ padding: '12px', border: '1px solid #ddd' }}>المبنى / المنظومة</th>
+                            <th style={{ padding: '12px', border: '1px solid #ddd' }}>رقم الصمام</th>
+                            <th style={{ padding: '12px', border: '1px solid #ddd' }}>الحالة الفنية</th>
+                            <th style={{ padding: '12px', border: '1px solid #ddd' }}>المفتش</th>
+                            <th style={{ padding: '12px', border: '1px solid #ddd' }}>التقرير</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {inspections.map((report, idx) => (
+                            <tr key={idx} style={{ textAlign: 'center' }}>
+                                <td style={{ padding: '10px', border: '1px solid #ddd' }}>{new Date(report.inspection_date).toLocaleDateString('ar-SA')}</td>
+                                <td style={{ padding: '10px', border: '1px solid #ddd' }}>
+                                    {report.fire_valves?.fire_systems?.building_name} / {report.fire_valves?.fire_systems?.system_name}
+                                </td>
+                                <td style={{ padding: '10px', border: '1px solid #ddd', fontWeight: 'bold' }}>{report.valve_number}</td>
+                                <td style={{ padding: '10px', border: '1px solid #ddd' }}>
+                                    {report.is_fully_open && !report.has_leaks ? 
+                                        <span style={{ color: 'green' }}>● مطابق للمواصفات</span> : 
+                                        <span style={{ color: 'red' }}>● يوجد ملاحظات فنية</span>
+                                    }
+                                </td>
+                                <td style={{ padding: '10px', border: '1px solid #ddd' }}>{report.inspector_name}</td>
+                                <td style={{ padding: '10px', border: '1px solid #ddd' }}>
+                                    <Link href={`/report/${report.id}`} style={{ color: '#d32f2f', textDecoration: 'none', fontWeight: 'bold' }}>عرض الشهادة التفصيلية</Link>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
