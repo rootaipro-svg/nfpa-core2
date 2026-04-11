@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-// استخدمنا هذه الطريقة لإجبار Vercel على تخطي الفحص أثناء البناء
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL ? process.env.NEXT_PUBLIC_SUPABASE_URL : 'https://xyz.supabase.co';
-const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : 'dummy-key-to-bypass-error-12345';
+// وضعنا المفاتيح هنا مباشرة لنتجاوز مشاكل إعدادات Vercel نهائياً
+const supabaseUrl = 'https://uysfhchahbayozbisppy.supabase.co';
+const supabaseKey = 'sb_publishable_T03nYMwpGp1uXXTPLqx_1Q_JnzMuqML';
 
-export const supabase = createClient(url, key);
+export const supabase = createClient(supabaseUrl, supabaseKey);
