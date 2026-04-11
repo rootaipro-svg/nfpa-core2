@@ -16,14 +16,12 @@ export default function InspectValve() {
         e.preventDefault();
         setLoading(true);
 
-        // المفاتيح المباشرة لتجاوز أي تعقيدات
         const supabaseUrl = 'https://uysfhchahbayozbisppy.supabase.co';
         const supabaseKey = 'sb_publishable_T03nYMwpGp1uXXTPLqx_1Q_JnzMuqML';
         
         try {
             const supabase = createClient(supabaseUrl, supabaseKey);
             
-            // نستخدم الجدول البسيط الذي رأيته في صورتك
             const { error } = await supabase
                 .from('valve_inspections')
                 .insert([{ 
@@ -33,7 +31,7 @@ export default function InspectValve() {
                 }]);
 
             if (error) {
-                alert("حدث خطأ أثناء الإرسال، تأكد أنك ألغيت قفل RLS لهذا الجدول: " + error.message);
+                alert("حدث خطأ أثناء الإرسال: " + error.message);
             } else {
                 alert("تم إرسال تقرير الفحص بنجاح إلى الإدارة!");
             }
