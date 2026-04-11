@@ -2,30 +2,51 @@
 import React, { useState } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import Link from 'next/link';
+import { supabase } from '../../lib/supabase';
 
 export default function AddValve() {
     const [valve, setValve] = useState({ number: '', type: 'OS&Y', location: '' });
     const [qrUrl, setQrUrl] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleGenerate = (e: any) => {
+    const handleSave = async (e: any) => {
         e.preventDefault();
-        // هذا رابط مبدئي سيتم تغييره لاحقاً عند ربط قاعدة البيانات
-        const fakeId = valve.number || 'test';
-        setQrUrl(`${window.location.origin}/inspect/${fakeId}`);
+        setLoading(true);
+
+        // 1. حفظ البيانات في جدول fire_valves في سوبابيس
+        const { data, error } = await supabase
+            .from('fire_valves')
+            .insert([{ 
+                valve_number: valve.number, 
+                valve_type: valve.type, 
+                location_description: valve.location 
+            }])
+            .select();
+
+        // 2. التحقق من النتيجة وتوليد الكود
+        if (error) {
+            alert("حدث خطأ أثناء الحفظ: " + error.message);
+        } else if (data && data.length > 0) {
+            const realId = data[0].id;
+            setQrUrl(`${window.location.origin}/inspect/${realId}`);
+            alert("تم الحفظ في قاعدة البيانات بنجاح!");
+        }
+        
+        setLoading(false);
     };
 
     return (
         <div style={{ padding: '30px', fontFamily: 'Arial', direction: 'rtl', maxWidth: '500px', margin: 'auto' }}>
             <h2 style={{ color: '#d32f2f' }}>إضافة صمام جديد (NFPA 25)</h2>
-            <form onSubmit={handleGenerate} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 <input required placeholder="رقم الصمام (مثلاً: V-101)" style={{ padding: '12px', border: '1px solid #ccc', borderRadius: '5px' }} onChange={e => setValve({...valve, number: e.target.value})} />
                 <select style={{ padding: '12px', borderRadius: '5px' }} onChange={e => setValve({...valve, type: e.target.value})}>
                     <option value="OS&Y">OS&Y (خارجي وبكرة)</option>
                     <option value="Butterfly">Butterfly (فراشة)</option>
                 </select>
                 <input placeholder="موقع الصمام" style={{ padding: '12px', border: '1px solid #ccc', borderRadius: '5px' }} onChange={e => setValve({...valve, location: e.target.value})} />
-                <button type="submit" style={{ padding: '15px', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' }}>
-                    حفظ وتوليد QR Code
+                <button type="submit" disabled={loading} style={{ padding: '15px', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' }}>
+                    {loading ? 'جاري الحفظ في القاعدة...' : 'حفظ وتوليد QR Code'}
                 </button>
             </form>
 
