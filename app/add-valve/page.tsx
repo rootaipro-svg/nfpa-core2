@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
@@ -8,12 +8,16 @@ export default function AddValve() {
     const [valve, setValve] = useState({ number: '', type: 'OS&Y', location: '' });
     const [qrUrl, setQrUrl] = useState('');
     const [loading, setLoading] = useState(false);
+    const [siteUrl, setSiteUrl] = useState('');
+
+    useEffect(() => {
+        setSiteUrl(window.location.origin);
+    }, []);
 
     const handleSave = async (e: any) => {
         e.preventDefault();
         setLoading(true);
 
-        // الحل الجذري: الاتصال بقاعدة البيانات يتم تعريفه هنا، ولن يراه Vercel أثناء البناء
         const supabaseUrl = 'https://uysfhchahbayozbisppy.supabase.co';
         const supabaseKey = 'sb_publishable_T03nYMwpGp1uXXTPLqx_1Q_JnzMuqML';
         
@@ -32,12 +36,13 @@ export default function AddValve() {
             if (error) {
                 alert("حدث خطأ أثناء الحفظ: " + error.message);
             } else if (data && data.length > 0) {
-                const realId = data[0].id;
-                setQrUrl(`${window.location.origin}/inspect/${realId}`);
+                // نستخدم رقم الصمام ليكون واضحاً للمفتش عند مسح الكود
+                const realId = data[0].valve_number; 
+                setQrUrl(`${siteUrl}/inspect/${realId}`);
                 alert("تم الحفظ في قاعدة البيانات بنجاح!");
             }
         } catch (err) {
-            alert("خطأ في الاتصال: تأكد من صحة الرابط والمفتاح");
+            alert("خطأ في الاتصال بقاعدة البيانات");
         }
         
         setLoading(false);
