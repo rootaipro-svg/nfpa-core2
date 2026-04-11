@@ -22,6 +22,7 @@ export default function RootLayout({
           <Link href="/valves" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>سجل الصمامات</Link>
           <Link href="/pump-test" style={{ color: '#ffeb3b', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>⚙️ اختبار المضخات</Link>
           <Link href="/impairments" style={{ color: '#ffc107', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>⚠️ سجل الأعطال</Link>
+       <Link href="/scheduler" style={{ color: '#00bcd4', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>📅 الجدولة الذكية</Link>
         </nav>
 
         <main>
