@@ -5,16 +5,15 @@ import Link from 'next/link';
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  // هنا تضع رابط شعار شركتك (شركة الفحص)
+  const YOUR_COMPANY_LOGO = "https://ai4hse.com/wp-content/uploads/2024/01/logo.png"; 
 
- const navLinks = [
+  const navLinks = [
     { name: '🏠 الرئيسية', href: '/' },
-    { name: '📋 تقارير الفحص', href: '/dashboard' },
+    { name: '🏢 إدارة الجهات', href: '/management' },
     { name: '🛠️ سجل الصمامات', href: '/valves' },
-    { name: '⚙️ اختبار المضخات', href: '/pump-test' },
-    { name: '⚠️ سجل الأعطال', href: '/impairments' },
     { name: '📅 الجدولة الذكية', href: '/scheduler' },
-    { name: '🏢 إدارة الجهات', href: '/management' }, // الزر الجديد
+    { name: '📋 تقارير الفحص', href: '/dashboard' },
   ];
 
   return (
@@ -24,54 +23,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{ margin: 0, fontFamily: 'Arial, sans-serif', backgroundColor: '#f4f7f6' }}>
         
-        {/* شريط علوي ذكي */}
-        <nav style={{ 
-          backgroundColor: '#d32f2f', 
-          height: '60px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          padding: '0 20px', 
-          color: 'white', 
-          position: 'sticky', 
-          top: 0, 
-          zIndex: 1000,
-          boxShadow: '0 2px 5px rgba(0,0,0,0.2)' 
-        }}>
-          {/* زر القائمة للجوال */}
-          <button onClick={toggleMenu} style={{ 
-            background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer', marginLeft: '15px' 
-          }}>
-            ☰
-          </button>
+        <nav style={{ backgroundColor: '#d32f2f', height: '70px', display: 'flex', alignItems: 'center', padding: '0 20px', color: 'white', position: 'sticky', top: 0, zIndex: 1000, boxShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
+          <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '28px', cursor: 'pointer', marginLeft: '15px' }}>☰</button>
           
-          <h2 style={{ margin: 0, fontSize: '18px', flexGrow: 1 }}>NFPA 25 System</h2>
+          <div style={{ flexGrow: 1, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* شعار شركة الفحص المالكة للنظام */}
+            <img src={YOUR_COMPANY_LOGO} alt="RootAIPro Logo" style={{ height: '40px', borderRadius: '5px', background: 'white', padding: '2px' }} />
+            <h2 style={{ margin: 0, fontSize: '18px' }}>RootAIPro - NFPA 25</h2>
+          </div>
         </nav>
 
-        {/* القائمة الجانبية المنبثقة */}
         {isOpen && (
-          <div style={{
-            position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1001
-          }} onClick={toggleMenu}>
-            <div style={{
-              position: 'fixed', top: 0, right: 0, bottom: 0, width: '250px', background: '#fff', padding: '20px', boxShadow: '-2px 0 10px rgba(0,0,0,0.2)'
-            }} onClick={e => e.stopPropagation()}>
-              <h3 style={{ color: '#d32f2f', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>القائمة</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {navLinks.map((link, idx) => (
-                  <Link key={idx} href={link.href} onClick={toggleMenu} style={{ 
-                    textDecoration: 'none', color: '#333', fontWeight: 'bold', padding: '10px', borderRadius: '5px', background: '#f9f9f9' 
-                  }}>
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1001 }} onClick={() => setIsOpen(false)}>
+            <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '260px', background: '#fff', padding: '25px', boxShadow: '-5px 0 15px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
+                <h3 style={{ color: '#d32f2f', borderBottom: '2px solid #eee', paddingBottom: '10px' }}>القائمة الرئيسية</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
+                    {navLinks.map((link, idx) => (
+                      <Link key={idx} href={link.href} onClick={() => setIsOpen(false)} style={{ textDecoration: 'none', color: '#333', fontWeight: 'bold', padding: '12px', borderRadius: '8px', background: '#f5f5f5' }}>{link.name}</Link>
+                    ))}
+                </div>
             </div>
           </div>
         )}
 
-        <main style={{ paddingBottom: '30px' }}>
-          {children}
-        </main>
+        <main>{children}</main>
       </body>
     </html>
   );
