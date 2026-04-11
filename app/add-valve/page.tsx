@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import Link from 'next/link';
-import { supabase } from '../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export default function AddValve() {
     const [valve, setValve] = useState({ number: '', type: 'OS&Y', location: '' });
@@ -13,23 +13,31 @@ export default function AddValve() {
         e.preventDefault();
         setLoading(true);
 
-        // 1. حفظ البيانات في جدول fire_valves في سوبابيس
-        const { data, error } = await supabase
-            .from('fire_valves')
-            .insert([{ 
-                valve_number: valve.number, 
-                valve_type: valve.type, 
-                location_description: valve.location 
-            }])
-            .select();
+        // الحل الجذري: الاتصال بقاعدة البيانات يتم تعريفه هنا، ولن يراه Vercel أثناء البناء
+        const supabaseUrl = 'https://uysfhchahbayozbisppy.supabase.co';
+        const supabaseKey = 'sb_publishable_T03nYMwpGp1uXXTPLqx_1Q_JnzMuqML';
+        
+        try {
+            const supabase = createClient(supabaseUrl, supabaseKey);
+            
+            const { data, error } = await supabase
+                .from('fire_valves')
+                .insert([{ 
+                    valve_number: valve.number, 
+                    valve_type: valve.type, 
+                    location_description: valve.location 
+                }])
+                .select();
 
-        // 2. التحقق من النتيجة وتوليد الكود
-        if (error) {
-            alert("حدث خطأ أثناء الحفظ: " + error.message);
-        } else if (data && data.length > 0) {
-            const realId = data[0].id;
-            setQrUrl(`${window.location.origin}/inspect/${realId}`);
-            alert("تم الحفظ في قاعدة البيانات بنجاح!");
+            if (error) {
+                alert("حدث خطأ أثناء الحفظ: " + error.message);
+            } else if (data && data.length > 0) {
+                const realId = data[0].id;
+                setQrUrl(`${window.location.origin}/inspect/${realId}`);
+                alert("تم الحفظ في قاعدة البيانات بنجاح!");
+            }
+        } catch (err) {
+            alert("خطأ في الاتصال: تأكد من صحة الرابط والمفتاح");
         }
         
         setLoading(false);
