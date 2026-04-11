@@ -7,13 +7,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
-  const navLinks = [
-    { name: 'الرئيسية', href: '/' },
-    { name: 'تقارير الفحص', href: '/dashboard' },
-    { name: 'سجل الصمامات', href: '/valves' },
+ const navLinks = [
+    { name: '🏠 الرئيسية', href: '/' },
+    { name: '📋 تقارير الفحص', href: '/dashboard' },
+    { name: '🛠️ سجل الصمامات', href: '/valves' },
     { name: '⚙️ اختبار المضخات', href: '/pump-test' },
     { name: '⚠️ سجل الأعطال', href: '/impairments' },
     { name: '📅 الجدولة الذكية', href: '/scheduler' },
+    { name: '🏢 إدارة الجهات', href: '/management' }, // الزر الجديد
   ];
 
   return (
