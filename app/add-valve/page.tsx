@@ -1,79 +1,71 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
-import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 
 export default function AddValve() {
-    const [valve, setValve] = useState({ number: '', type: 'OS&Y', location: '' });
+    const [systems, setSystems] = useState<any[]>([]);
+    const [valve, setValve] = useState({ number: '', type: 'OS&Y', system_id: '', location: '' });
     const [qrUrl, setQrUrl] = useState('');
     const [loading, setLoading] = useState(false);
-    const [siteUrl, setSiteUrl] = useState('');
+
+    const supabase = createClient('https://uysfhchahbayozbisppy.supabase.co', 'sb_publishable_T03nYMwpGp1uXXTPLqx_1Q_JnzMuqML');
 
     useEffect(() => {
-        setSiteUrl(window.location.origin);
+        const fetchSystems = async () => {
+            const { data } = await supabase.from('fire_systems').select('*');
+            if (data) setSystems(data);
+        };
+        fetchSystems();
     }, []);
 
     const handleSave = async (e: any) => {
         e.preventDefault();
         setLoading(true);
+        const { data, error } = await supabase.from('fire_valves').insert([{ 
+            valve_number: valve.number, 
+            valve_type: valve.type, 
+            system_id: valve.system_id,
+            location_description: valve.location 
+        }]).select();
 
-        const supabaseUrl = 'https://uysfhchahbayozbisppy.supabase.co';
-        const supabaseKey = 'sb_publishable_T03nYMwpGp1uXXTPLqx_1Q_JnzMuqML';
-        
-        try {
-            const supabase = createClient(supabaseUrl, supabaseKey);
-            
-            const { data, error } = await supabase
-                .from('fire_valves')
-                .insert([{ 
-                    valve_number: valve.number, 
-                    valve_type: valve.type, 
-                    location_description: valve.location 
-                }])
-                .select();
-
-            if (error) {
-                alert("حدث خطأ أثناء الحفظ: " + error.message);
-            } else if (data && data.length > 0) {
-                // نستخدم رقم الصمام ليكون واضحاً للمفتش عند مسح الكود
-                const realId = data[0].valve_number; 
-                setQrUrl(`${siteUrl}/inspect/${realId}`);
-                alert("تم الحفظ في قاعدة البيانات بنجاح!");
-            }
-        } catch (err) {
-            alert("خطأ في الاتصال بقاعدة البيانات");
+        if (!error && data) {
+            setQrUrl(`${window.location.origin}/inspect/${data[0].valve_number}`);
+            alert("تم تسجيل الصمام وربطه بالمنظومة بنجاح!");
         }
-        
         setLoading(false);
     };
 
     return (
-        <div style={{ padding: '30px', fontFamily: 'Arial', direction: 'rtl', maxWidth: '500px', margin: 'auto' }}>
-            <h2 style={{ color: '#d32f2f' }}>إضافة صمام جديد (NFPA 25)</h2>
-            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <input required placeholder="رقم الصمام (مثلاً: V-101)" style={{ padding: '12px', border: '1px solid #ccc', borderRadius: '5px' }} onChange={e => setValve({...valve, number: e.target.value})} />
-                <select style={{ padding: '12px', borderRadius: '5px' }} onChange={e => setValve({...valve, type: e.target.value})}>
-                    <option value="OS&Y">OS&Y (خارجي وبكرة)</option>
-                    <option value="Butterfly">Butterfly (فراشة)</option>
+        <div style={{ padding: '20px', maxWidth: '500px', margin: 'auto', direction: 'rtl' }}>
+            <h2 style={{ color: '#d32f2f', borderBottom: '2px solid' }}>تأسيس أصل (Asset Registration)</h2>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
+                <label>رقم الصمام:</label>
+                <input required placeholder="V-101" style={{ padding: '12px' }} onChange={e => setValve({...valve, number: e.target.value})} />
+                
+                <label>المنظومة التابع لها:</label>
+                <select required style={{ padding: '12px' }} onChange={e => setValve({...valve, system_id: e.target.value})}>
+                    <option value="">-- اختر المنظومة --</option>
+                    {systems.map(sys => <option key={sys.id} value={sys.id}>{sys.system_name} ({sys.building_name})</option>)}
                 </select>
-                <input placeholder="موقع الصمام" style={{ padding: '12px', border: '1px solid #ccc', borderRadius: '5px' }} onChange={e => setValve({...valve, location: e.target.value})} />
-                <button type="submit" disabled={loading} style={{ padding: '15px', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' }}>
-                    {loading ? 'جاري الحفظ في القاعدة...' : 'حفظ وتوليد QR Code'}
+
+                <label>نوع الصمام:</label>
+                <select style={{ padding: '12px' }} onChange={e => setValve({...valve, type: e.target.value})}>
+                    <option value="OS&Y">OS&Y Gate Valve</option>
+                    <option value="Butterfly">Butterfly Valve</option>
+                </select>
+
+                <button type="submit" disabled={loading} style={{ padding: '15px', background: '#d32f2f', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+                    {loading ? 'جاري الحفظ...' : 'حفظ وتوليد QR'}
                 </button>
             </form>
 
             {qrUrl && (
-                <div style={{ marginTop: '30px', textAlign: 'center', border: '2px dashed #d32f2f', padding: '20px', borderRadius: '10px' }}>
-                    <h3 style={{ color: '#333' }}>كود الصمام: {valve.number}</h3>
-                    <QRCodeCanvas value={qrUrl} size={180} />
-                    <p style={{ marginTop: '15px', fontSize: '14px', color: '#666' }}>قم بطباعة هذا الكود ولصقه على الصمام</p>
+                <div style={{ marginTop: '30px', textAlign: 'center', padding: '20px', border: '2px dashed #333' }}>
+                    <QRCodeCanvas value={qrUrl} size={150} />
+                    <p>رابط الفحص الميداني جاهز</p>
                 </div>
             )}
-            
-            <div style={{ marginTop: '30px', textAlign: 'center' }}>
-                <Link href="/" style={{ color: '#0066cc', textDecoration: 'none' }}>← العودة للرئيسية</Link>
-            </div>
         </div>
     );
 }
