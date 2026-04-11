@@ -18,10 +18,15 @@ export default function Dashboard() {
         try {
             const supabase = createClient(supabaseUrl, supabaseKey);
             
-            // جلب البيانات من جدول الفحوصات وترتيبها من الأحدث للأقدم
+            // سحب البيانات مع دمج رقم الصمام من جدول fire_valves
             const { data, error } = await supabase
                 .from('valve_inspections')
-                .select('*')
+                .select(`
+                    *,
+                    fire_valves (
+                        valve_number
+                    )
+                `)
                 .order('inspection_date', { ascending: false });
 
             if (error) {
@@ -53,8 +58,9 @@ export default function Dashboard() {
                             <tr style={{ backgroundColor: '#d32f2f', color: 'white' }}>
                                 <th style={{ padding: '15px', border: '1px solid #ddd' }}>التاريخ</th>
                                 <th style={{ padding: '15px', border: '1px solid #ddd' }}>المفتش</th>
-                                <th style={{ padding: '15px', border: '1px solid #ddd' }}>الصمام</th>
+                                <th style={{ padding: '15px', border: '1px solid #ddd' }}>رقم الصمام</th>
                                 <th style={{ padding: '15px', border: '1px solid #ddd' }}>مفتوح؟</th>
+                                <th style={{ padding: '15px', border: '1px solid #ddd' }}>مقفل/مراقب؟</th>
                                 <th style={{ padding: '15px', border: '1px solid #ddd' }}>تسريب؟</th>
                                 <th style={{ padding: '15px', border: '1px solid #ddd' }}>ملاحظات</th>
                             </tr>
@@ -62,16 +68,27 @@ export default function Dashboard() {
                         <tbody>
                             {inspections.map((insp, index) => (
                                 <tr key={index} style={{ borderBottom: '1px solid #ddd', backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#fff' }}>
-                                    <td style={{ padding: '12px', border: '1px solid #ddd', fontSize: '14px' }}>{new Date(insp.inspection_date).toLocaleString('ar-SA')}</td>
-                                    <td style={{ padding: '12px', border: '1px solid #ddd', fontWeight: 'bold' }}>{insp.inspector_name}</td>
-                                    <td style={{ padding: '12px', border: '1px solid #ddd', color: '#0066cc' }}>الفحص للصمام المربوط</td>
-                                    <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                        {insp.is_fully_open ? <span style={{ color: 'green' }}>✔ نعم</span> : <span style={{ color: 'red' }}>✖ لا</span>}
+                                    <td style={{ padding: '12px', border: '1px solid #ddd', fontSize: '14px' }}>
+                                        {new Date(insp.inspection_date).toLocaleString('ar-SA')}
+                                    </td>
+                                    <td style={{ padding: '12px', border: '1px solid #ddd', fontWeight: 'bold' }}>
+                                        {insp.inspector_name}
+                                    </td>
+                                    <td style={{ padding: '12px', border: '1px solid #ddd', color: '#0066cc', fontWeight: 'bold', direction: 'ltr', textAlign: 'right' }}>
+                                        {insp.fire_valves?.valve_number || 'غير معروف'}
                                     </td>
                                     <td style={{ padding: '12px', border: '1px solid #ddd' }}>
-                                        {insp.has_leaks ? <span style={{ color: 'red' }}>⚠ يوجد</span> : <span style={{ color: 'green' }}>سليم</span>}
+                                        {insp.is_fully_open ? <span style={{ color: 'green', fontWeight: 'bold' }}>✔ نعم</span> : <span style={{ color: 'red', fontWeight: 'bold' }}>✖ لا</span>}
                                     </td>
-                                    <td style={{ padding: '12px', border: '1px solid #ddd' }}>{insp.notes || '-'}</td>
+                                    <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                                        {insp.is_locked_or_supervised ? <span style={{ color: 'green' }}>✔ نعم</span> : <span style={{ color: 'red' }}>✖ لا</span>}
+                                    </td>
+                                    <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                                        {insp.has_leaks ? <span style={{ color: 'red', fontWeight: 'bold' }}>⚠ يوجد</span> : <span style={{ color: 'green' }}>سليم</span>}
+                                    </td>
+                                    <td style={{ padding: '12px', border: '1px solid #ddd' }}>
+                                        {insp.notes || '-'}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
