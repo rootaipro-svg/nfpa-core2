@@ -15,15 +15,14 @@ export default function RootLayout({
       <body style={{ margin: 0, fontFamily: 'Arial, sans-serif', backgroundColor: '#f4f7f6', minHeight: '100vh' }}>
         
         {/* شريط التصفح العلوي */}
-        <nav style={{ backgroundColor: '#d32f2f', padding: '15px 30px', display: 'flex', gap: '25px', color: 'white', alignItems: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.2)' }}>
+        <nav style={{ backgroundColor: '#d32f2f', padding: '15px 30px', display: 'flex', gap: '25px', color: 'white', alignItems: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', flexWrap: 'wrap' }}>
           <h2 style={{ margin: 0, marginLeft: 'auto', fontSize: '22px' }}>NFPA 25 System</h2>
           <Link href="/" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>الرئيسية</Link>
           <Link href="/dashboard" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>تقارير الفحص</Link>
           <Link href="/valves" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>سجل الصمامات</Link>
-          <Link href="/add-valve" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>إضافة صمام</Link>
+          <Link href="/pump-test" style={{ color: '#ffeb3b', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>⚙️ اختبار المضخات</Link>
         </nav>
 
-        {/* محتوى الصفحات يظهر هنا */}
         <main>
           {children}
         </main>
