@@ -1,35 +1,77 @@
+'use client'
+import React, { useState } from 'react';
 import Link from 'next/link';
 
-export const metadata = {
-  title: 'نظام NFPA 25 - إدارة الصمامات',
-  description: 'نظام ذكي لإدارة وفحص صمامات الحريق',
-}
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const navLinks = [
+    { name: 'الرئيسية', href: '/' },
+    { name: 'تقارير الفحص', href: '/dashboard' },
+    { name: 'سجل الصمامات', href: '/valves' },
+    { name: '⚙️ اختبار المضخات', href: '/pump-test' },
+    { name: '⚠️ سجل الأعطال', href: '/impairments' },
+    { name: '📅 الجدولة الذكية', href: '/scheduler' },
+  ];
+
   return (
     <html lang="ar" dir="rtl">
-      <body style={{ margin: 0, fontFamily: 'Arial, sans-serif', backgroundColor: '#f4f7f6', minHeight: '100vh' }}>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+      </head>
+      <body style={{ margin: 0, fontFamily: 'Arial, sans-serif', backgroundColor: '#f4f7f6' }}>
         
-        {/* شريط التصفح العلوي */}
-        <nav style={{ backgroundColor: '#d32f2f', padding: '15px 30px', display: 'flex', gap: '25px', color: 'white', alignItems: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', flexWrap: 'wrap' }}>
-          <h2 style={{ margin: 0, marginLeft: 'auto', fontSize: '22px' }}>NFPA 25 System</h2>
-          <Link href="/" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>الرئيسية</Link>
-          <Link href="/dashboard" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>تقارير الفحص</Link>
-          <Link href="/valves" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>سجل الصمامات</Link>
-          <Link href="/pump-test" style={{ color: '#ffeb3b', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>⚙️ اختبار المضخات</Link>
-          <Link href="/impairments" style={{ color: '#ffc107', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>⚠️ سجل الأعطال</Link>
-       <Link href="/scheduler" style={{ color: '#00bcd4', textDecoration: 'none', fontWeight: 'bold', fontSize: '16px' }}>📅 الجدولة الذكية</Link>
+        {/* شريط علوي ذكي */}
+        <nav style={{ 
+          backgroundColor: '#d32f2f', 
+          height: '60px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          padding: '0 20px', 
+          color: 'white', 
+          position: 'sticky', 
+          top: 0, 
+          zIndex: 1000,
+          boxShadow: '0 2px 5px rgba(0,0,0,0.2)' 
+        }}>
+          {/* زر القائمة للجوال */}
+          <button onClick={toggleMenu} style={{ 
+            background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer', marginLeft: '15px' 
+          }}>
+            ☰
+          </button>
+          
+          <h2 style={{ margin: 0, fontSize: '18px', flexGrow: 1 }}>NFPA 25 System</h2>
         </nav>
 
-        <main>
+        {/* القائمة الجانبية المنبثقة */}
+        {isOpen && (
+          <div style={{
+            position: 'fixed', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1001
+          }} onClick={toggleMenu}>
+            <div style={{
+              position: 'fixed', top: 0, right: 0, bottom: 0, width: '250px', background: '#fff', padding: '20px', boxShadow: '-2px 0 10px rgba(0,0,0,0.2)'
+            }} onClick={e => e.stopPropagation()}>
+              <h3 style={{ color: '#d32f2f', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>القائمة</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {navLinks.map((link, idx) => (
+                  <Link key={idx} href={link.href} onClick={toggleMenu} style={{ 
+                    textDecoration: 'none', color: '#333', fontWeight: 'bold', padding: '10px', borderRadius: '5px', background: '#f9f9f9' 
+                  }}>
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <main style={{ paddingBottom: '30px' }}>
           {children}
         </main>
-        
       </body>
     </html>
-  )
+  );
 }
