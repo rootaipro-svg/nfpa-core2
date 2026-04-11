@@ -1,4 +1,4 @@
-'use client'
+'use client'// تحديث جديد لإجبار النظام
 import React from 'react';
 import Link from 'next/link';
 
