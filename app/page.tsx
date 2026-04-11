@@ -4,23 +4,28 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div style={{ padding: '50px', fontFamily: 'Arial', textAlign: 'center', direction: 'rtl', minHeight: '100vh', backgroundColor: '#fff' }}>
-      <h1 style={{ color: '#d32f2f', fontSize: '32px' }}>نظام NFPA 25 الذكي</h1>
-      <div style={{ background: '#f4f4f4', padding: '30px', borderRadius: '15px', display: 'inline-block', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-        <p style={{ fontSize: '20px', fontWeight: 'bold' }}>مرحباً بك يا أستاذ عمر</p>
-        <p>النظام الآن جاهز ومربوط بقاعدة البيانات بنجاح.</p>
+    <div style={{ padding: '20px', textAlign: 'center', direction: 'rtl' }}>
+      <div style={{ marginTop: '30px', marginBottom: '30px' }}>
+        <h1 style={{ color: '#d32f2f', fontSize: '28px' }}>NFPA 25 الذكي</h1>
+        <p style={{ color: '#666' }}>نظام إدارة وامتثال صمامات ومضخات الحريق</p>
       </div>
       
-      <div style={{ marginTop: '40px', display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
-         <Link href="/add-valve">
-           <button style={{ padding: '15px 40px', fontSize: '18px', cursor: 'pointer', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold' }}>
-             إضافة صمام وتوليد QR
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px', margin: 'auto' }}>
+         <Link href="/add-valve" style={{ textDecoration: 'none' }}>
+           <button style={{ width: '100%', padding: '20px', fontSize: '18px', cursor: 'pointer', background: '#d32f2f', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(211,47,47,0.3)' }}>
+             ➕ إضافة صمام جديد
            </button>
          </Link>
 
-         <Link href="/dashboard">
-           <button style={{ padding: '15px 40px', fontSize: '18px', cursor: 'pointer', background: '#333', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold' }}>
-             عرض لوحة تحكم التقارير
+         <Link href="/dashboard" style={{ textDecoration: 'none' }}>
+           <button style={{ width: '100%', padding: '20px', fontSize: '18px', cursor: 'pointer', background: '#fff', color: '#333', border: '2px solid #333', borderRadius: '12px', fontWeight: 'bold' }}>
+             📋 تقارير الفحص الميداني
+           </button>
+         </Link>
+
+         <Link href="/scheduler" style={{ textDecoration: 'none' }}>
+           <button style={{ width: '100%', padding: '20px', fontSize: '18px', cursor: 'pointer', background: '#00bcd4', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold' }}>
+             📅 جدول الصيانة والامتثال
            </button>
          </Link>
       </div>
