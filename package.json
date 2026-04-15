@@ -12,7 +12,8 @@
     "react": "latest",
     "react-dom": "latest",
     "qrcode.react": "latest",
-    "@supabase/supabase-js": "latest"
+    "@supabase/supabase-js": "latest",
+    "@paypal/react-paypal-js": "latest"
   },
   "devDependencies": {
     "typescript": "latest",
